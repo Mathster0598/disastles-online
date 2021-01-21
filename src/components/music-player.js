@@ -18,7 +18,7 @@ import {
   pause,
   stop,
   skip,
-  changeVolume,
+  changeMusicVolume,
   muteMusic,
 } from '../actions/music';
 import { currentOffset } from '../reducers/music';
@@ -74,7 +74,8 @@ const styles = theme => ({
     width: 90,
   },
   back: {
-    background: 'url(' + bgBackward + ') no-repeat',
+    backgroundImage: `url(${bgBackward})`,
+    backgroundRepeat: 'no-repeat',
     backgroundSize: '100% 100%',
     width: 37 / SCALE,
     minWidth: 37 / SCALE,
@@ -83,12 +84,15 @@ const styles = theme => ({
     padding: 0,
 
     '&:hover': {
-      background: 'url(' + bgBackwardHover + ') no-repeat',
-      backgroundSize: '100% 100%',
-    }
+      backgroundImage: `url(${bgBackwardHover})`,
+    },
+    '&:active': {
+      backgroundImage: `url(${bgBackwardActive})`,
+    },
   },
   play: {
-    background: 'url(' + bgPlay + ') no-repeat',
+    backgroundImage: 'url(' + bgPlay + ')',
+    backgroundRepeat: 'no-repeat',
     backgroundSize: '100% 100%',
     width: 38 / SCALE,
     minWidth: 38 / SCALE,
@@ -97,12 +101,15 @@ const styles = theme => ({
     padding: 0,
 
     '&:hover': {
-      background: 'url(' + bgPlayHover + ') no-repeat',
-      backgroundSize: '100% 100%',
-    }
+      backgroundImage: 'url(' + bgPlayHover + ')',
+    },
+    '&:active': {
+      backgroundImage: `url(${bgPlayActive})`,
+    },
   },
   pause: {
-    background: 'url(' + bgPause + ') no-repeat',
+    backgroundImage: 'url(' + bgPause + ')',
+    backgroundRepeat: 'no-repeat',
     backgroundSize: '100% 100%',
     width: 41 / SCALE,
     minWidth: 41 / SCALE,
@@ -111,12 +118,15 @@ const styles = theme => ({
     padding: 0,
 
     '&:hover': {
-      background: 'url(' + bgPauseHover + ') no-repeat',
-      backgroundSize: '100% 100%',
-    }
+      backgroundImage: 'url(' + bgPauseHover + ')',
+    },
+    '&:active': {
+      backgroundImage: `url(${bgPauseActive})`,
+    },
   },
   forward: {
-    background: 'url(' + bgForward + ') no-repeat',
+    backgroundImage: 'url(' + bgForward + ')',
+    backgroundRepeat: 'no-repeat',
     backgroundSize: '100% 100%',
     width: 37 / SCALE,
     minWidth: 37 / SCALE,
@@ -125,12 +135,15 @@ const styles = theme => ({
     padding: 0,
 
     '&:hover': {
-      background: 'url(' + bgForwardHover + ') no-repeat',
-      backgroundSize: '100% 100%',
-    }
+      backgroundImage: 'url(' + bgForwardHover + ')',
+    },
+    '&:active': {
+      backgroundImage: `url(${bgForwardActive})`,
+    },
   },
   stop: {
-    background: 'url(' + bgStop + ') no-repeat',
+    backgroundImage: 'url(' + bgStop + ')',
+    backgroundRepeat: 'no-repeat',
     backgroundSize: '100% 100%',
     width: 41 / SCALE,
     minWidth: 41 / SCALE,
@@ -139,12 +152,15 @@ const styles = theme => ({
     padding: 0,
 
     '&:hover': {
-      background: 'url(' + bgStopHover + ') no-repeat',
-      backgroundSize: '100% 100%',
-    }
+      backgroundImage: 'url(' + bgStopHover + ')',
+    },
+    '&:active': {
+      backgroundImage: `url(${bgStopActive})`,
+    },
   },
   volume: {
-    background: 'url(' + bgVolume + ') no-repeat',
+    backgroundImage: 'url(' + bgVolume + ')',
+    backgroundRepeat: 'no-repeat',
     backgroundSize: '100% 100%',
     width: 42 / SCALE,
     minWidth: 42 / SCALE,
@@ -153,13 +169,11 @@ const styles = theme => ({
     padding: 0,
 
     '&:hover': {
-      background: 'url(' + bgVolumeHover + ') no-repeat',
-      backgroundSize: '100% 100%',
+      backgroundImage: 'url(' + bgVolumeHover + ')',
     },
     '&.muted': {
-      background: 'url(' + bgVolumeMuted + ') no-repeat',
-      backgroundSize: '100% 100%',
-    }
+      backgroundImage: 'url(' + bgVolumeMuted + ')',
+    },
   },
   sliderWrapper: {
     padding: 10,
@@ -184,7 +198,7 @@ class MusicPlayer extends Component {
     this.skip = this.skip.bind(this);
     this.toggleVolume = this.toggleVolume.bind(this);
     this.closeVolume = this.closeVolume.bind(this);
-    this.changeVolume = this.changeVolume.bind(this);
+    this.changeMusicVolume = this.changeMusicVolume.bind(this);
     this.showVolume = this.showVolume.bind(this);
     this.cancelShowVolume = this.cancelShowVolume.bind(this);
     this.toggleMute = this.toggleMute.bind(this);
@@ -246,8 +260,8 @@ class MusicPlayer extends Component {
       return;
     }
   }
-  changeVolume (event, value) {
-    this.props.dispatch(changeVolume(value));
+  changeMusicVolume (event, value) {
+    this.props.dispatch(changeMusicVolume(value));
   }
   back () {
     this.props.dispatch(previous());
@@ -373,7 +387,7 @@ class MusicPlayer extends Component {
       <div className={ this.props.classes.sliderWrapper }>
         <Slider
           value={ this.props.musicVolume }
-          onChange={ this.changeVolume }
+          onChange={ this.changeMusicVolume }
           vertical />
       </div>
     );

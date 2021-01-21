@@ -4,15 +4,14 @@ import { BrowserRouter, Route } from 'react-router-dom';
 import LobbyMenu from './components/lobby';
 import LobbyView from './components/lobby/lobby';
 import GameView from './components/game';
+import Typography from '@material-ui/core/Typography';
 import * as Sentry from '@sentry/browser';
 import window from 'global/window';
 import API from './api';
-
-import Typography from '@material-ui/core/Typography';
-
 import './App.css';
 
 window.API = API;
+window.__MUI_USE_NEXT_TYPOGRAPHY_VARIANTS__ = true;
 
 if (process.env.NODE_ENV === 'production') {
   window._LTracker.push({
@@ -23,7 +22,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 if (process.env.NODE_ENV === 'production') {
   let url = 'https://80afa086ba9d42aab17007c344d4d6f9@sentry.io/1382576';
-  let x = '//'; // this is to fix stupid highlighting in JSX
+  // let x = '//'; // this is to fix stupid highlighting in JSX
 
   Sentry.init({
     dsn: url,
@@ -55,11 +54,10 @@ class App extends Component {
 
   render() {
     if (this.state.hasError) {
-      console.log(this.state);
       return (
         <React.Fragment>
           <Typography>
-            <img src='https://media.giphy.com/media/EuLnAYIZZjB3q/giphy.gif' />
+            <img src='https://media.giphy.com/media/EuLnAYIZZjB3q/giphy.gif' alt='crash and burn'/>
             <br />
             Good news! The error you just enountered was reported to the developers to be fixed!
             <br />

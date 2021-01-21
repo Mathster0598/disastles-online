@@ -5,7 +5,6 @@ import obstruction from 'obstruction';
 import { partial } from 'ap';
 
 import { If } from 'react-extras';
-import Typography from '@material-ui/core/Typography';
 import Button from './button';
 import Card from './card';
 
@@ -110,6 +109,8 @@ class Shop extends Component {
         case 'PlayActionCard':
           canActionCard = true;
           break;
+        default:
+          break;
       }
     });
 
@@ -119,8 +120,12 @@ class Shop extends Component {
     if (canMove && allMoves && newProps.selectedActions.indexOf('MoveRoom') === -1) {
       this.props.dispatch(selectActions(['MoveRoom']));
     }
-
-    console.log('can skip?', canSkipTurn, newProps.selectedActions, newProps.selectedActions.indexOf('MoveRoom'));
+    if (!canSwap && newProps.selectActions && newProps.selectActions.indexOf('SwapRooms') !== -1) {
+      this.props.dispatch(selectActions(newProps.selectActions.filter((action) => action !== 'SwapRooms')));
+    }
+    if (!canMove && newProps.selectActions && newProps.selectActions.indexOf('MoveRoom') !== -1) {
+      this.props.dispatch(selectActions(newProps.selectActions.filter((action) => action !== 'MoveRoom')));
+    }
 
     this.setState({
       canSkipTurn,
@@ -193,6 +198,7 @@ class Shop extends Component {
             <Button
               disabled={ !this.state.canSkipTurn }
               blue
+              narrow
               onClick={ this.skipTurn } >
               Skip Turn
             </Button> } />
@@ -203,6 +209,7 @@ class Shop extends Component {
             <Button
               disabled={ !this.state.canMove }
               blue
+              narrow
               dark={ this.props.selectedActions.indexOf('MoveRoom') > -1 }
               onClick={ this.moveCards } >
               Move Cards
@@ -214,6 +221,7 @@ class Shop extends Component {
             <Button
               disabled={ !this.state.canSwap }
               blue
+              narrow
               dark={ this.props.selectedActions.indexOf('SwapRooms') > -1 }
               onClick={ this.swapCards } >
               Swap Cards
@@ -225,6 +233,7 @@ class Shop extends Component {
             <Button
               disabled={ !this.state.canActionCard }
               blue
+              narrow
               onClick={ this.actionCards } >
               Card Action
             </Button> } />
@@ -239,7 +248,7 @@ class Shop extends Component {
       if (action.card !== card) {
         return;
       }
-      if (action.action == 'BuildRoom') {
+      if (action.action === 'BuildRoom' || action.action === 'BuildAndSwapRoom') {
         isClickable = true;
       } else {
         isClickable = action;

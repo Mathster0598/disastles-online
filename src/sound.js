@@ -5,6 +5,7 @@ import Collector from 'collect-methods';
 import Event from 'geval';
 import songs from './songs';
 
+const loadedSongs ={};
 const soundBuffers = {};
 const audio = {};
 const sounds = {
@@ -24,6 +25,11 @@ const sounds = {
   disaster: '/mp3/stinger_disaster.mp3',
   gameover: '/mp3/stinger_endscreen.mp3',
 };
+
+export const INITIAL_MUSIC_VOLUME = 0.8;
+export const INITIAL_AMBIENCE_VOLUME = 0.1;
+export const INITIAL_SFX_VOLUME = 0.4;
+export const INITIAL_PLAYER_TURN_VOLUME = 0.9;
 
 export default audio;
 
@@ -70,26 +76,28 @@ async function loadAll () {
   audio.sfx = createVolumeChannel();
   audio.ambience = createVolumeChannel();
   audio.music = createVolumeChannel();
-  audio.sfx.setVolume(0.4);
-  audio.ambience.setVolume(0.1);
+  audio.playerTurn = createVolumeChannel();
+  audio.optionsMenu = createVolumeChannel();
+  audio.sfx.setVolume(localStorage.sfxVolume ? Number(localStorage.sfxVolume) / 100 : INITIAL_SFX_VOLUME);
+  audio.ambience.setVolume(localStorage.ambienceVolume ? Number(localStorage.ambienceVolume) / 100 : INITIAL_AMBIENCE_VOLUME);
+  audio.playerTurn.setVolume(localStorage.playerTurnVolume ? Number(localStorage.playerTurnVolume) / 100 : INITIAL_PLAYER_TURN_VOLUME);
 
   await Promise.all(Object.keys(sounds).map(async function (name) {
     return loadSound(name, sounds[name]);
   }));
-  await Promise.all(songs.map(loadSong));
+
   resumeAudioContext();
 
   if (localStorage.musicMuted === 'true') {
     audio.music.setVolume(0);
   } else {
     startAmbience();
-    audio.music.setVolume(localStorage.musicVolume ? Number(localStorage.musicVolume) / 100 : 0.8);
+    audio.music.setVolume(localStorage.musicVolume ? Number(localStorage.musicVolume) / 100 : INITIAL_MUSIC_VOLUME);
   }
 }
 
 function startAmbience () {
   audio.stopAmbience();
-  console.log('Starting ambience');
   audio.stopAmbience(audio.ambience.playSound('ambience'));
   audio.stopAmbience(interval(function () {
     audio.stopAmbience(audio.ambience.playSound('ambience'));
@@ -135,15 +143,16 @@ async function playSong (node, index, offset) {
   let currentVolume = 1;
   gainNode.gain.setValueAtTime(1, context.currentTime);
 
-  if (!songs[index].buffer) {
-    songs[index].buffer = await decodeAudioData(songs[index].response);
+  if (!loadedSongs[index]) {
+    songs[index].buffer = await loadSong(songs[index], index)
+  }
+  if (!loadedSongs[index].buffer) {
+    loadedSongs[index].buffer = await decodeAudioData(songs[index].buffer);
   }
   let source = context.createBufferSource();
-  source.buffer = songs[index].buffer;
+  source.buffer = loadedSongs[index].buffer;
   source.connect(gainNode);
   gainNode.connect(node);
-
-  console.log('Starting at offset?', index, offset);
 
   source.start(0, offset/1000 || 0);
 
@@ -183,14 +192,14 @@ async function loadSound (name, url) {
   soundBuffers[name] = await decodeAudioData(await loadSoundData(url));
 }
 
-async function loadSong (data) {
+async function loadSong (data, index) {
   data.response = await loadSoundData('/mp3/songs/' + data.file);
+  loadedSongs[index] = {};
   return data.response;
 }
 
 async function loadSoundData (url) {
   return new Promise(function (resolve, reject) {
-    console.log('Requesting this track:', url);
     var request = new XMLHttpRequest();
 
     request.open('GET', url);

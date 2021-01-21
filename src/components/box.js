@@ -4,8 +4,6 @@ import { connect } from 'react-redux';
 import obstruction from 'obstruction';
 import { classNames, If } from 'react-extras';
 
-import Typography from '@material-ui/core/Typography';
-
 const styles = theme => ({
   root: {
     position: 'relative',
@@ -16,6 +14,10 @@ const styles = theme => ({
     '&.thirtytwo': {
       borderRadius: 32,
       padding: 32,
+    },
+    '&.sixteen': {
+      borderRadius: 16,
+      padding: 16,
     },
     '&:focus': {
       outline: 'none'
@@ -68,7 +70,12 @@ function makeCorner (y, x) {
     '&.thirtytwo': {
       height: 32,
       width: 32,
-    }
+    },
+    '&.sixteen': {
+      height: 16,
+      width: 16,
+      backgroundSize: '100% 100%',
+    },
   };
 }
 
@@ -79,102 +86,121 @@ function makeEdge (type) {
     zIndex: 1,
     height: isVertical ? 64 : 'calc(100% - 128px)',
     width: isVertical ? 'calc(100% - 128px)' : 64,
-    // margin: isVertical ? '0 64px 0 64px' : '64px 0 64px 0',
     backgroundRepeat: 'repeat-' + (isVertical ? 'x' : 'y'),
     [type]: 0,
     '&.thirtytwo': {
       height: isVertical ? 32 : 'calc(100% - 64px)',
       width: isVertical ? 'calc(100% - 64px)' : 32,
-    }
+    },
+    '&.sixteen': {
+      height: isVertical ? 16 : 'calc(100% - 32px)',
+      width: isVertical ? 'calc(100% - 32px)' : 16,
+      backgroundSize: '100% 100%',
+    },
   };
 }
 
 
 class BoxComponent extends Component {
-  constructor () {
-    super();
-  }
   render () {
     var props = obstruction({
       style: true
     })(this.props);
     return (
       <div
-        className={ classNames(this.props.classes.root, {
-          thirtytwo: this.props.half
-        }) }
+        className={ classNames(
+          this.props.classes.root,
+          { thirtytwo: this.props.half },
+          { sixteen: this.props.fourth },
+        ) }
         style={{
           height: this.props.height,
           width: this.props.width,
         }}
         >
         <div
-          className={ classNames(this.props.classes.topLeft, {
-            thirtytwo: this.props.half
-          }) }
+          className={ classNames(
+            this.props.classes.topLeft,
+            { thirtytwo: this.props.half },
+            { sixteen: this.props.fourth },
+          ) }
           style={{
             backgroundImage: 'url(' + this.props.topLeft + ')'
           }}
         >
         </div>
         <div
-          className={ classNames(this.props.classes.topRight, {
-            thirtytwo: this.props.half
-          }) }
+          className={ classNames(
+            this.props.classes.topRight,
+            { thirtytwo: this.props.half },
+            { sixteen: this.props.fourth },
+          ) }
           style={{
             backgroundImage: 'url(' + this.props.topRight + ')'
           }}
         >
         </div>
         <div
-          className={ classNames(this.props.classes.bottomLeft, {
-            thirtytwo: this.props.half
-          }) }
+          className={ classNames(
+            this.props.classes.bottomLeft,
+            { thirtytwo: this.props.half },
+            { sixteen: this.props.fourth },
+          ) }
           style={{
             backgroundImage: 'url(' + this.props.bottomLeft + ')'
           }}
         >
         </div>
         <div
-          className={ classNames(this.props.classes.bottomRight, {
-            thirtytwo: this.props.half
-          }) }
+          className={ classNames(
+            this.props.classes.bottomRight,
+            { thirtytwo: this.props.half },
+            { sixteen: this.props.fourth },
+          ) }
           style={{
             backgroundImage: 'url(' + this.props.bottomRight + ')'
           }}
         >
         </div>
         <div
-          className={ classNames(this.props.classes.left, {
-            thirtytwo: this.props.half
-          }) }
+          className={ classNames(
+            this.props.classes.left,
+            { thirtytwo: this.props.half },
+            { sixteen: this.props.fourth },
+          ) }
           style={{
             backgroundImage: 'url(' + this.props.left + ')'
           }}
         >
         </div>
         <div
-          className={ classNames(this.props.classes.right, {
-            thirtytwo: this.props.half
-          }) }
+          className={ classNames(
+            this.props.classes.right,
+            { thirtytwo: this.props.half },
+            { sixteen: this.props.fourth },
+          ) }
           style={{
             backgroundImage: 'url(' + this.props.right + ')'
           }}
         >
         </div>
         <div
-          className={ classNames(this.props.classes.top, {
-            thirtytwo: this.props.half
-          }) }
+          className={ classNames(
+            this.props.classes.top,
+            { thirtytwo: this.props.half },
+            { sixteen: this.props.fourth },
+          ) }
           style={{
             backgroundImage: 'url(' + this.props.top + ')'
           }}
         >
         </div>
         <div
-          className={ classNames(this.props.classes.bottom, {
-            thirtytwo: this.props.half
-          }) }
+          className={ classNames(
+            this.props.classes.bottom,
+            { thirtytwo: this.props.half },
+            { sixteen: this.props.fourth },
+          ) }
           style={{
             backgroundImage: 'url(' + this.props.bottom + ')'
           }}
@@ -203,15 +229,17 @@ class BoxComponent extends Component {
                 }} />
             </div> } />
         <div
-          className={ classNames(this.props.classes.content, {
-            thirtytwo: this.props.half
-          }) }
+          className={ classNames(
+            this.props.classes.content,
+            { thirtytwo: this.props.half },
+            { sixteen: this.props.fourth },
+          ) }
           {...props}
           style={{...(props.style ? props.style : {}),
             backgroundImage: 'url(' + this.props.color + ')',
             minHeight: '100%',
             height: this.props.height
-              ? this.props.height - (this.props.half ? 64 : 128) + (this.props.margin ? (0 - this.props.margin) * 2 : 0)
+              ? this.props.height - (this.props.fourth ? 32 : this.props.half ? 64 : 128) + (this.props.margin ? (0 - this.props.margin) * 2 : 0)
               : null,
             margin: this.props.margin
           }}>

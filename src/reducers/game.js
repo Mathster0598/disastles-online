@@ -1,4 +1,3 @@
-import Obstruction from 'obstruction';
 import Sound from '../sound';
 
 import {
@@ -29,7 +28,6 @@ import {
   TURN_TIMEOUT_NOTIFICATION,
 
   GAME_ENDED,
-
 } from '../actions/game';
 
 import {
@@ -75,16 +73,16 @@ export default function reduce (state, action) {
     state = defaultState;
   }
 
+  let player;
+
   switch (action.type) {
     case ACTIONS_CHANGED:
-      console.log('Actions changed', action.data.actions);
       state = {...state,
         actions: action.data.actions,
         actionable: !!action.data.actions.length
       };
       break;
     case JOINED_GAME:
-      console.log('joined game', action.data.snapshot);
       if (Sound && Sound.sfx) {
         Sound.sfx.playSound('startGame');
       }
@@ -123,7 +121,6 @@ export default function reduce (state, action) {
       }
       break;
     case CARDS_RETURNED_FROM_PLAYER:
-      console.log('Emptying players hand');
       state = {...state,
         playerCards: {...state.playerCards},
         drawPileSize: action.data.drawPileSize
@@ -131,7 +128,6 @@ export default function reduce (state, action) {
       delete state.playerCards[action.data.player];
       break;
     case CARDS_DRAWN_TO_PLAYER:
-      console.log('Player drew some cards?', action);
       Sound.sfx.playSound('draw');
       state = {...state,
         playerCards: {...state.playerCards,
@@ -154,10 +150,8 @@ export default function reduce (state, action) {
       };
       state.shop.push(action.data.card);
       state.shop = state.shop.filter((a) => !!a);
-      console.log('card Added to shop!', [...state.shop]);
       break;
     case CARD_DISCARDED:
-      console.log('card discarded', action);
       Sound.sfx.playSound('discard');
       state = {...state,
         discardPile: [...state.discardPile],
@@ -209,7 +203,6 @@ export default function reduce (state, action) {
       };
       break;
     case CARD_PLAYED:
-      console.log('Card played', action.data);
       if (action.data.card) {
         Sound.sfx.playSound('action');
       }
@@ -218,11 +211,7 @@ export default function reduce (state, action) {
       };
       break;
     case ROOM_BUILT_AND_SWAPPED:
-      console.log('Moving room for build & swap', action);
-      var roomX = null;
-      var roomY = null;
-
-      var player = action.data.castleOwner;
+      player = action.data.castleOwner;
       state = {...state,
         castles: {...state.castles,
           [player]: {...state.castles[player]}
@@ -231,8 +220,6 @@ export default function reduce (state, action) {
 
       state.castles[player].nodes = state.castles[player].nodes.map(function (node) {
         if (action.data.swap === node.card) {
-          roomX = node.x;
-          roomY = node.y;
           return {...node,
             rotation: action.data.swapRotation,
             x: action.data.x,
@@ -254,9 +241,9 @@ export default function reduce (state, action) {
         }
       };
       // intentionally no break
+      // eslint-disable-next-line no-fallthrough
     case ROOM_BUILT:
-      console.log(action.data);
-      var player = action.data.castleOwner;
+      player = action.data.castleOwner;
       var node = {...action.data};
       delete node.castleOwner;
 
@@ -289,8 +276,7 @@ export default function reduce (state, action) {
       break;
     case ROOM_ROTATED:
     case ROOM_MOVED:
-      console.log('Moving room', action);
-      var player = action.data.castleOwner;
+      player = action.data.castleOwner;
       state = {...state,
         castles: {...state.castles,
           [player]: {...state.castles[player]}
@@ -311,7 +297,6 @@ export default function reduce (state, action) {
       break;
 
     case ROOMS_SWAPPED:
-      console.log('Swapping rooms >.>', action);
       state = {...state,
         castles: {...state.castles}
       };
@@ -350,9 +335,8 @@ export default function reduce (state, action) {
       state.castles[secondPlayer] = updateCastle(state.castles[secondPlayer]);
       break;
     case LINK_CREATED:
-      console.log('Link created', action);
       Sound.sfx.playSound('connection');
-      var player = action.data.castleOwner;
+      player = action.data.castleOwner;
       state = {...state,
         castles: {...state.castles,
           [player]: {...state.castles[player],
@@ -363,9 +347,7 @@ export default function reduce (state, action) {
       state.castles[player] = updateCastle(state.castles[player]);
       break;
     case ROOM_ACTIVATED:
-      console.log('Room activated!', action);
-      var player = castleOwner(state, action.data.room);
-      console.log('player owner', player);
+      player = castleOwner(state, action.data.room);
       state = {...state,
         castles: {...state.castles,
           [player]: {...state.castles[player],
@@ -380,8 +362,7 @@ export default function reduce (state, action) {
       };
       break;
     case ROOM_DEACTIVATED:
-      console.log('Room deactivated!', action);
-      var player = castleOwner(state, action.data.room);
+      player = castleOwner(state, action.data.room);
       state = {...state,
         castles: {...state.castles,
           [player]: {...state.castles[player],
@@ -396,7 +377,7 @@ export default function reduce (state, action) {
       };
       break;
     case CASTLE_STATS_CHANGED:
-      var player = action.data.castleOwner;
+      player = action.data.castleOwner;
       state = {...state,
         castles: {...state.castles,
           [player]: {...state.castles[player],
@@ -406,8 +387,7 @@ export default function reduce (state, action) {
       };
       break;
     case ROOM_MARKED:
-      console.log('room marked for destruction', action);
-      var player = action.data.castleOwner;
+      player = action.data.castleOwner;
       state = {...state,
         castles: {...state.castles,
           [player]: {...state.castles[player],
@@ -422,8 +402,7 @@ export default function reduce (state, action) {
       };
       break;
     case ROOMS_UNMARKED:
-      console.log('rooms unmarked!', action);
-      var player = action.data.castleOwner;
+      player = action.data.castleOwner;
       state = {...state,
         castles: {...state.castles,
           [player]: {...state.castles[player],
@@ -440,8 +419,6 @@ export default function reduce (state, action) {
       // end castle stuff
 
     case DISASTER_STARTED:
-      console.log('Disaster started', action);
-      // Sound.sfx.playSound('disaster');
       state = {...state,
         currentDisaster: action.data.card,
         disasterModal: {...action.data,
@@ -454,7 +431,6 @@ export default function reduce (state, action) {
       };
       break;
     case DISASTER_SACRIFICES_REQUIRED:
-      console.log('Disaster sacrifices', action);
       Sound.sfx.playSound('disaster');
       state = {...state,
         disasterModal: {...state.disasterModal,
@@ -469,7 +445,6 @@ export default function reduce (state, action) {
       };
       break;
     case DISASTER_FINISHED:
-      console.log('Disaster finished');
       state = {...state,
         currentDisaster: null,
         shop: state.shop.filter((card) => card !== state.currentDisaster),
@@ -477,7 +452,6 @@ export default function reduce (state, action) {
       };
       break;
     case TURN_CHANGED:
-      console.log('turn change', action);
       state = {...state,
         currentTurn: action.data.currentTurn,
         selectedCard: null,
@@ -493,20 +467,21 @@ export default function reduce (state, action) {
       break;
     case TURN_TIMEOUT_NOTIFICATION:
       Sound.sfx.playSound('negative');
-      console.log('Turn is timing out...', action);
       state = {...state,
         turnTimeout: action.data.secondsLeft,
         timeoutStart: Date.now(),
       };
       break;
     case GAME_ENDED:
-      console.log('The game has ended', action.data);
       Sound.sfx.playSound('gameover');
       state = {...state,
         gameEnded: true,
         gameStats: action.data,
         turnTimeout: null,
       };
+      break;
+
+    default:
       break;
   }
 

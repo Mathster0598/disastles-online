@@ -6,14 +6,10 @@ import { partial } from 'ap';
 import { classNames } from 'react-extras';
 
 import Card from '../card';
-import Typography from '@material-ui/core/Typography';
 
 export const CARD_ZOOM = 1.3;
 
 const styles = theme => ({
-  root: {
-  },
-
   node: {
     position: 'relative',
     width: 85 * CARD_ZOOM,
@@ -92,7 +88,6 @@ class GridTile extends Component {
   renderCell (y, minX, node, i) {
     let x = i + minX;
     if (this.props.rotationCoords && this.props.rotationCoords[0] === x && this.props.rotationCoords[1] === y) {
-      console.log('This is a rotation room');
       return this.renderRotationCard();
     }
     let key = x + ':' + y;
@@ -146,16 +141,14 @@ class GridTile extends Component {
 
     let rotations = [];
     actions.forEach(function (action) {
-      if (action.rotation !== undefined && rotations.indexOf(action.rotation) === -1 && action.x === x && action.y === y) {
-        rotations.push(action.rotation)
+      if (action.rotation !== undefined && rotations.indexOf(action.rotation) === -1) {
+        if (action.x === undefined || (action.x === x && action.y === y)) {
+          rotations.push(action.rotation)
+        }
       }
     });
 
     rotations = rotations.sort();
-
-    if (actions.length) {
-      // console.log(node ? node.card : x + ',' + y, actionsTypes, rotations, this.props.selectedActions);
-    }
 
     if (!node && !isClickable) {
       return (
@@ -164,7 +157,6 @@ class GridTile extends Component {
             this.props.classes.node,
             node && ('rotation' + node.rotation),
             this.props.columnSizes[x],
-            // this.props.rowSizes[y],
             ) }
           key={ key } >
         </div>
@@ -177,7 +169,6 @@ class GridTile extends Component {
           this.props.classes.node,
           node && ('rotation' + node.rotation),
           this.props.columnSizes[x],
-          // this.props.rowSizes[y],
           ) }
         data-rotations={ rotations }
         data-actions={ actions }
@@ -204,15 +195,12 @@ class GridTile extends Component {
     let rotation = this.props.rotations[this.props.currentRotation];
     let action = this.props.rotationActions.filter((a) => a.rotation === rotation)[0];
 
-    console.log('Rendering at rotation', rotation);
-
     return (
       <div
         className={ classNames(
           this.props.classes.node,
           'rotation' + rotation,
           this.props.columnSizes[x]
-          // this.props.rowSizes[y],
         ) }
         key={ key }
         >
@@ -221,7 +209,7 @@ class GridTile extends Component {
           skinny={ this.props.columnSizes[x] !== 'wide' }
           card={ this.props.rotationCard }
           onClick={ partial(this.sendAction, this.props.rotationCard, [action], [], x, y) }
-          onRotation={ this.nextRotation }
+          onRotation={ this.props.nextRotation }
           confirm
           />
       </div>
@@ -242,7 +230,7 @@ function splitWords (word) {
 }
 
 const mapToProps = obstruction({
-  playerId: 'global.playerId',
+  playerId: 'minimap.displayPlayer',
 });
 
 export default withStyles(styles)(connect(mapToProps)(GridTile));

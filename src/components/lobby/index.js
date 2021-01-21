@@ -1,17 +1,17 @@
 import React, { Component } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import { connect } from 'react-redux';
-import { classNames, If } from 'react-extras';
+import { If } from 'react-extras';
 import obstruction from 'obstruction';
 
 import Button from '../game/button';
 import Box from '../box';
 import MusicPlayer from '../music-player';
+import OptionsModal from '../options-modal';
 import SellStuff from '../shill';
 import Background from './background';
+import PlayNowButton from './play-now-button';
 import Input from '@material-ui/core/Input';
-import Tooltip from '@material-ui/core/Tooltip';
-import Typography from '@material-ui/core/Typography';
 
 import API from '../../api';
 import Sound from '../../sound';
@@ -115,16 +115,12 @@ class LobbyMenu extends Component {
   componentWillMount () {
     document.documentElement.className = 'noscroll';
   }
-  componentWillUnmount () {
-    document.documentElement.className = '';
-  }
   componentWillReceiveProps (newProps) {
     if (newProps.lobbyId) {
       this.props.history.push('/lobby/' + newProps.lobbyId);
     }
   }
   async onNewGame () {
-    console.log('Start new game or something...');
     Sound.sfx.playSound('positive');
 
     var id = await API.createLobby();
@@ -151,8 +147,9 @@ class LobbyMenu extends Component {
     return (
       <Background rootClass={ this.props.classes.root }>
         <MusicPlayer />
+        <OptionsModal />
         <SellStuff />
-        <img src={ logoImage } />
+        <img src={ logoImage } alt="logo" />
         <br />
         <br />
         <Box
@@ -173,6 +170,7 @@ class LobbyMenu extends Component {
           }}
           >
 
+          <PlayNowButton />
           <Button
             onClick={ this.onNewGame }
             blue
@@ -207,24 +205,10 @@ class LobbyMenu extends Component {
               onChange={this.handleChange('lobbyId')}
             />
           </div>
-          <Tooltip
-            title='Coming soon'
-            >
-            <Button
-              onClick={ ()=> {
-                API.matchmaking();
-              }}
-              disabled={ this.props.isSearching }
-              blue
-              className={ classNames(this.props.classes.button, this.props.classes.matchmaking) }
-              >
-              { this.props.isSearching ? 'Searching...' : 'Matchmaking' }
-            </Button>
-          </Tooltip>
         </Box>
         <div className={ this.props.classes.discord }>
           <If condition={ this.state.showDiscord }
-            render={ () => <iframe src="https://discordapp.com/widget?id=466201397252325376&theme=dark" width="350" height="90%" allowtransparency="true" frameBorder="0"></iframe> } />
+            render={ () => <iframe title="discord" src="https://discordapp.com/widget?id=466201397252325376&theme=dark" width="350" height="90%" allowtransparency="true" frameBorder="0"></iframe> } />
           <If condition={ !this.state.showDiscord }
             render={ () =>
               <div
@@ -238,7 +222,7 @@ class LobbyMenu extends Component {
 
 const mapToProps = obstruction({
   lobbyId: 'lobby.id',
-  isSearching: 'lobby.isSearching',
+  busStopNextTimestamp: 'lobby.busStopNextTimestamp',
 });
 
 export default withStyles(styles)(connect(mapToProps)(LobbyMenu));

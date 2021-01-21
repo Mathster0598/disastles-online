@@ -2,7 +2,6 @@ import {
   LOBBY_SNAPSHOT,
   PLAYER_JOINED,
   PLAYER_LEAVE,
-  PLAYER_SLOT_CHANGED,
   STATUS_CHANGED,
   ALL_READY,
   HOST_CHANGED,
@@ -15,6 +14,7 @@ import {
   HELLO
 } from '../actions/global';
 
+import API from '../api';
 import Sound from '../sound';
 
 const defaultState = {
@@ -25,6 +25,8 @@ const defaultState = {
   players: [],
   settings: [],
   isSearching: false,
+  busStopNextTimestamp: null,
+  matchmakingFailed: false,
 };
 
 export default function reduce (state, action) {
@@ -44,25 +46,32 @@ export default function reduce (state, action) {
       };
       break;
     case SEARCH_STARTED:
+      if (state.isSearching) {
+        API.cancelMatchmaking();
+      }
       state = {...state,
         isSearching: true,
         id: null,
         isReady: false,
+        busStopNextTimestamp: action.data.busStopNextTimestamp,
+        matchmakingFailed: state.isSearching,
       };
       break;
     case SEARCH_CANCELLED:
       state = {...state,
-        isSearching: false
+        isSearching: false,
+        busStopNextTimestamp: null,
       };
       break;
     case PLAYER_JOINED:
-      console.log('Player joined', action);
       state = {...state,
         playerData: {...state.playerData,
           [action.player.player]: {...action.player,
             id: action.player.player
           }
-        }
+        },
+        isSearching: false,
+        busStopNextTimestamp: null,
       };
       break;
     case PLAYER_LEAVE:
@@ -73,9 +82,8 @@ export default function reduce (state, action) {
       break;
     case LOBBY_SNAPSHOT:
       if (state.isSearching) {
-        Sound.sfx.playSound('turn');
+        Sound.playerTurn.playSound('turn');
       }
-      console.log('snapshot', action);
       state = {...state,
         id: action.snapshot.id,
         settings: action.snapshot.settings,
@@ -103,7 +111,6 @@ export default function reduce (state, action) {
       }
       break;
     case COLOR_CHANGED:
-      console.log('Color changed', action.data);
       state = {...state,
         playerData: {...state.playerData,
           [action.data.player]: {...state.playerData[action.data.player],
@@ -118,13 +125,11 @@ export default function reduce (state, action) {
       };
       break;
     case HOST_CHANGED:
-      console.log('The host changed', action.data.player);
       state = {...state,
         host: action.data.player
       };
       break;
     case SETTING_CHANGED:
-      console.log('Host changed the settings...', action.data);
       state = {...state,
         settings: state.settings.map(function (setting) {
           if (setting.key === action.data.key) {
@@ -134,6 +139,8 @@ export default function reduce (state, action) {
         })
       };
       break;
+    default:
+      return state;
   }
 
   return state;

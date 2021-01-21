@@ -16,6 +16,13 @@ export async function matchmaking () {
   });
 }
 
+export async function cancelMatchmaking () {
+  await ws.init();
+  ws.send({
+    action: 'CancelGameSearch'
+  });
+}
+
 export async function createLobby () {
   await ws.init();
   return new Promise((resolve, reject) => {
@@ -109,6 +116,24 @@ export async function reconnect (token) {
   ws.send({
     action: 'Reconnect',
     token
+  });
+}
+
+export async function mutePlayer (player) {
+  await ws.init();
+  ws.send({
+    action: 'MutePlayer',
+    player,
+    mute: true,
+  });
+}
+
+export async function unmutePlayer (player) {
+  await ws.init();
+  ws.send({
+    action: 'MutePlayer',
+    player,
+    mute: false,
   });
 }
 

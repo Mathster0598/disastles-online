@@ -1,11 +1,10 @@
 import Event from 'geval/event';
 
 const MessageEvent = Event();
-const url = 'wss://www.ocwalk.com/api/ws';
+const url = 'wss://disastles.herokuapp.com/api/ws';
 
 var ws = null;
 var initPromise = null;
-var currentID = 0;
 
 reconnect();
 

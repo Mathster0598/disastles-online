@@ -60,8 +60,8 @@ const styles = theme => ({
 });
 
 class SellThugAim extends Component {
-  constructor () {
-    super();
+  constructor (props) {
+    super(props);
 
     this.state = {
       expanded: true
@@ -81,7 +81,8 @@ class SellThugAim extends Component {
       <div className={ classNames(this.props.classes.root, this.state) } >
         <a
           href='https://www.disastles.com/buy-the-game/disastles'
-          target='_target'
+          target='_blank'
+          rel='noopener noreferrer'
           className={ this.props.classes.background }>
           <Button
             classes={{

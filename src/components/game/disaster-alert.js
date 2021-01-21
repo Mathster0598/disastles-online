@@ -27,9 +27,10 @@ const SCALE = 2;
 const styles = theme => ({
   root: {
     width: 1964/SCALE,
-    height: 456/SCALE,
+    minHeight: '100vh',
     margin: '0 auto',
     marginTop: '10%',
+    cursor: 'pointer',
 
     '&:focus': {
       outline: 'none'
@@ -176,7 +177,6 @@ class DisasterAlert extends Component {
   }
 
   closeModal () {
-    console.log('dismiss disaster modal');
     this.props.dispatch(clearDisasterModal());
   }
 
@@ -204,13 +204,12 @@ class DisasterAlert extends Component {
     if (!this.props.data) {
       return [];
     }
-    console.log(this.props.data);
     return (
       <Modal
         open
         onClose={ this.closeModal }
         >
-        <div className={ this.props.classes.root }>
+        <div className={ this.props.classes.root } onClick={ this.closeModal }>
           <div ref={ partial(this.startBackgroundAnimation, 1) } className={ this.props.classes.bottom }>
           </div>
           <div ref={ partial(this.startBackgroundAnimation, 2) } className={ this.props.classes.middle }>

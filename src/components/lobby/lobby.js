@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import { connect } from 'react-redux';
 import obstruction from 'obstruction';
-import { If, classNames } from 'react-extras';
+import { If } from 'react-extras';
 import { partial } from 'ap';
 import Collector from 'collect-methods';
 import { timeout } from 'thyming';
@@ -11,25 +11,24 @@ import window from 'global/window';
 
 import Box from '../box';
 import MusicPlayer from '../music-player';
+import OptionsModal from '../options-modal';
+import Logs from '../logs';
 import DisastlesInput from '../input';
 import SellStuff from '../shill';
+import Loading from '../loading';
 import Background from './background';
 import Counter from './counter';
 import PlayerList from './player-list';
 import ThroneRoomSelector from './throne-room-selector';
 import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import Grid from '@material-ui/core/Grid';
-import Icon from '@material-ui/core/Icon';
-import Typography from '@material-ui/core/Typography';
 
 import CheckIcon from '@material-ui/icons/Check';
 import CloseIcon from '@material-ui/icons/Close';
 
 import API from '../../api';
 import Sound from '../../sound';
-import bgBackground from '../backgrounds/MenuBG.png';
 import bgLaunchGame from './images/launch-game.png';
 import bgLaunchGameActive from './images/launch-game-active.png';
 import bgLaunchGameHover from './images/launch-game-hover.png';
@@ -38,8 +37,6 @@ import bgButton from './images/button.png';
 import bgButtonHover from './images/button-hover.png';
 import bgButtonActive from './images/button-active.png';
 import bgLogo from './images/logo-small.png';
-import bgBox from './images/box.png';
-import bgBoxActive from './images/box-active.png';
 import bgTopLeftBox from './images/settings-tl.png';
 import bgTopRightBox from './images/settings-tr.png';
 import bgBottomLeftBox from './images/settings-bl.png';
@@ -103,9 +100,7 @@ const styles = theme => ({
     height: 80,
 
     '&:hover': {
-      bgLaunchGameHover
-    },
-    '&:hover': {
+      bgLaunchGameHover,
       bgLaunchGameActive
     }
   },
@@ -137,6 +132,12 @@ const styles = theme => ({
   },
   checkbox: {
     padding: 0,
+    color: 'rgba(255, 255, 255, 0.85)'
+  },
+  checkboxDisabled: {
+    'span& span': {
+      color: 'rgba(255, 255, 255, 0.4)',
+    }
   }
 });
 
@@ -167,7 +168,6 @@ class LobbyView extends Component {
   }
 
   async componentWillReceiveProps (newProps) {
-    console.log('props', newProps);
     var newState = {};
     if (newProps.name !== this.props.name) {
       newState.name = newProps.name;
@@ -214,7 +214,6 @@ class LobbyView extends Component {
     this.unlisten(timeout(() => API.setName(this.state.name), 1000));
     if (!this.props.lobbyId) {
       let paramId = this.props.match.params.id;
-      console.log('We\'re not in a lobby yet!', paramId, this.state.name);
       await API.joinLobby(paramId);
     }
     if (this.props.playerData[this.props.playerId] && this.props.playerData[this.props.playerId].status === 'Loading' && !this.hasLoaded) {
@@ -225,15 +224,11 @@ class LobbyView extends Component {
     document.documentElement.className = '';
   }
   componentWillUnmount () {
-    document.documentElement.className = '';
-  }
-  componentWillUnmount () {
     this.unlisten();
   }
 
   showHowToPlay () {
-    let a = '//';
-    window.open('http://disastles.com/about', '_blank');
+    window.open('http://disastles.com/how-to-play', '_blank');
   }
 
   async takeSlot (slot) {
@@ -261,6 +256,7 @@ class LobbyView extends Component {
       if (val.key === name) {
         return memo = val.value;
       }
+      return null;
     }, null);
   }
 
@@ -278,9 +274,7 @@ class LobbyView extends Component {
   }
 
   updateDisasterCount (newCount) {
-    console.log('Setting new diaster count!', newCount);
     if (!this.isHost()) {
-      console.log('not host');
       return;
     }
     this.setState({
@@ -290,9 +284,7 @@ class LobbyView extends Component {
   }
 
   updateCatastropheCount (newCount) {
-    console.log('Setting new diaster count!', newCount);
     if (!this.isHost()) {
-      console.log('not host');
       return;
     }
     this.setState({
@@ -327,7 +319,6 @@ class LobbyView extends Component {
 
   updateName (event) {
     var name = event.target.value;
-    console.log(name);
     this.setState({
       name
     });
@@ -341,19 +332,19 @@ class LobbyView extends Component {
   }
 
   render () {
-    var difficulty = 'Difficult';
-
     var disasterBounds = this.getBounds('DisastersCount');
     var catastropheBounds = this.getBounds('CatastrophesCount');
 
     return (
       <Background rootClass={ this.props.classes.root }>
         <MusicPlayer />
+        <OptionsModal />
+        <Logs inlobby />
         <SellStuff />
         <Grid container>
           <Grid item xs={4}>
             <a href="/">
-              <img src={ bgLogo } />
+              <img src={ bgLogo } alt='background' />
             </a>
           </Grid>
           <Grid item xs={6}>
@@ -487,7 +478,8 @@ class LobbyView extends Component {
                       <Grid item xs={ 6 }>
                         <Checkbox
                           classes={{
-                            root: this.props.classes.checkbox
+                            root: this.props.classes.checkbox,
+                            disabled: this.props.classes.checkboxDisabled,
                           }}
                           disabled={ !this.isHost() }
                           checked={ this.state.turnTimers }
@@ -602,22 +594,13 @@ class LobbyView extends Component {
                         paddingTop: 20
                       }}
                       >
-                      <PlayerList />
+                  <PlayerList toggleReady={this.toggleReady} />
                   </Box>
                 </Grid>
                 </Grid> } />
         <If condition={ !this.props.lobbyId }
           render={ () =>
-            <React.Fragment>
-              <br />
-              <br />
-              <center>
-                <CircularProgress size={ 128 }/>
-                <Typography variant="subtitle1">
-                  Joining lobby......
-                </Typography>
-              </center>
-            </React.Fragment> } />
+            <Loading message="Joining lobby..." loading open hideBackdrop /> } />
       </Background>
     );
   }
@@ -656,27 +639,3 @@ const mapToProps = obstruction({
 });
 
 export default withStyles(styles)(connect(mapToProps)(LobbyView));
-/*
-
-                  <Box
-                    half
-                    topLeft={ bgTopLeftBox }
-                      topRight={ bgTopRightBox }
-                      bottomLeft={ bgBottomLeftBox }
-                      bottomRight={ bgBottomRightBox }
-                      color={ bgColorBox }
-                      left={ bgLeftBox }
-                      right={ bgRightBox }
-                      top={ bgTopBox }
-                      bottom={ bgBottomBox }
-                      headerLeft={ bgHeaderLeftBox }
-                      headerRight={ bgHeaderRightBox }
-                      headerMiddle={ bgHeaderMiddleBox }
-                      header='Spectators'
-                      style={{
-                        paddingTop: 20
-                      }}
-                      >
-                      <PlayerList spectator />
-                  </Box>
-*/

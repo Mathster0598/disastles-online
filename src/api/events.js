@@ -15,6 +15,8 @@ import {
 } from '../actions/global';
 import { dispatchEvent } from '../actions/util';
 
+import { addNewLog } from '../components/logs';
+
 const LobbyCreatedEvent = Event();
 export const onLobbyCreated = LobbyCreatedEvent.listen;
 const LobbyJoinedEvent = Event();
@@ -66,6 +68,7 @@ ws.onEvent(function handleEvent (event) {
     case 'PlayerJoined':
       delete event.event;
       store.dispatch(playerJoined(event));
+      addNewLog('PlayerJoined', event.player);
       break;
     case 'SlotSwitched':
       delete event.event;
@@ -85,16 +88,42 @@ ws.onEvent(function handleEvent (event) {
     case 'JoinedGame':
       GameJoinedEvent.broadcast({});
       break;
-    //   delete event.event;
-    //   store.dispatch(joinedGame(event));
-    //   break;
+    case 'PlayerDisconnectedFromGame':
+      addNewLog('PlayerDisconnectedFromGame', event.player);
+      break;
+    case 'PlayerReconnectedToGame':
+      addNewLog('PlayerReconnectedToGame', event.player);
+      break;
+    case 'TurnTimeoutNotification':
+      addNewLog('TurnTimeoutNotification', event.secondsLeft);
+      break;
+    case 'TurnTimeout':
+      addNewLog('TurnTimeout', event.player);
+      break;
+    case 'TurnSkipped':
+      addNewLog('TurnSkipped', event.player);
+      break;
+    case 'DisasterAddedToDeck':
+      addNewLog('DisasterAddedToDeck');
+      break;
+    case 'PlayerConceded':
+      addNewLog('PlayerConceded', event.player);
+      break;
+    case 'ChatMessage':
+      addNewLog('ChatMessage', { player: event.player, text: event.text });
+      break;
+    case 'PlayerMuted':
+      addNewLog('PlayerMuted', { player: event.player, muted: event.muted });
+      break;
+    case 'SendChatMessageFailed':
+      addNewLog('SendChatMessageFailed', event.reason);
+      break;
     // default for debugging
     default:
       if (wasAutoDispatched) {
         break;
       }
-      console.log('Unknown event type:', event.event);
-      console.log(event);
+      // console.log('Unknown event type:', event);
       break;
   }
 });
@@ -108,22 +137,24 @@ function handleDisconnect (event) {
     KickedEvent.broadcast();
     return;
   }
-  console.log('Unknown disconnect reason:', event.reason);
+  // console.log('Unknown disconnect reason:', event.reason);
   window.location.href = '/';
 }
 
 function handleActions (event) {
   var isAllReady = false;
 
+  // eslint-disable-next-line array-callback-return
   event.actions.map(function (action) {
     switch (action.action) {
       case 'StartGame':
         isAllReady = true;
         break;
+
+      default:
+        break;
     }
   });
-
-  console.log(event.actions);
 
   if (wasAllReady !== isAllReady) {
     wasAllReady = isAllReady;
